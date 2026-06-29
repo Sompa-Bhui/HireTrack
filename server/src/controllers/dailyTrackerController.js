@@ -71,6 +71,15 @@ export const listHistory = asyncHandler(async (req, res) => {
   res.json({ items });
 });
 
+export const deleteHistoryDay = asyncHandler(async (req, res) => {
+  const { date } = req.params;
+  const result = await DailyTracker.deleteOne({ user: req.user._id, date });
+  if (!result.deletedCount) {
+    return res.status(404).json({ message: 'History day not found' });
+  }
+  res.json({ message: 'Deleted' });
+});
+
 export const getAnalytics = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { start: dayStart, end: dayEnd } = dayBounds();

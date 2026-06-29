@@ -3,8 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { api } from '../../services/api';
+import { SOURCE_OPTIONS } from '../../constants/sources';
+import { applicationHistoryQueryKey } from '../../hooks/useApplicationHistory';
 
-const platforms = ['LinkedIn', 'Indeed', 'Naukri', 'Foundit', 'Wellfound', 'HR Email', 'Company Career Page', 'Referral', 'Internshala', 'Glassdoor', 'Other'];
+const platforms = SOURCE_OPTIONS;
 
 export default function DailyApply() {
   const queryClient = useQueryClient();
@@ -31,6 +33,7 @@ export default function DailyApply() {
       toast.success(res.goalCompleted ? 'Mission Completed! Great Job!' : 'Daily tracker saved');
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['daily-tracker'] });
+      queryClient.invalidateQueries({ queryKey: applicationHistoryQueryKey });
     }
   });
 

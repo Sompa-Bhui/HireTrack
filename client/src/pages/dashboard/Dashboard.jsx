@@ -1,8 +1,12 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, LineChart, Line, Cell } from 'recharts';
 import { api } from '../../services/api';
+import { SOURCE_OPTIONS } from '../../constants/sources';
+import { useAuth } from '../../context/AuthContext';
+import { useApplicationHistory } from '../../hooks/useApplicationHistory';
 
 const statCards = [
   { key: 'todayApplications', label: "Today's Applications" },
@@ -18,18 +22,37 @@ const statCards = [
 const colors = ['#60a5fa', '#34d399', '#a78bfa', '#f59e0b', '#f97316', '#ef4444', '#14b8a6', '#22c55e', '#e879f9', '#38bdf8', '#facc15'];
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const { data } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => (await api.get('/api/dashboard')).data
   });
+  const { data: historyData } = useApplicationHistory();
 
-  const sourceChart = useMemo(() => data?.sourceAnalytics || [], [data?.sourceAnalytics]);
+  const sourceChart = useMemo(() => {
+    const sourceMap = new Map((data?.sourceAnalytics || []).map((item) => [item._id, item.count || 0]));
+    return SOURCE_OPTIONS.map((source) => ({ _id: source, count: sourceMap.get(source) || 0 }));
+  }, [data?.sourceAnalytics]);
   const dailyTrend = useMemo(() => data?.dailyTrend || [], [data?.dailyTrend]);
   const missionCompleted = !!data?.goalCompleted;
   const progress = data?.goalProgress || 0;
+  const userName = user?.name || user?.fullName || 'there';
+
+  const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const currentMonthTotal = useMemo(
+    () => (historyData?.items || [])
+      .filter((item) => item.date.startsWith(currentMonthKey))
+      .reduce((sum, item) => sum + (item.totalApplications || 0), 0),
+    [historyData?.items, currentMonthKey]
+  );
 
   return (
     <div className="space-y-6 pb-8">
+      <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur">
+        <div className="text-3xl font-semibold">Welcome back, {userName} 👋</div>
+        <div className="mt-2 text-sm text-white/60">Track your daily job applications and stay consistent.</div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {statCards.map((card) => (
           <motion.div key={card.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-glow backdrop-blur">
@@ -66,7 +89,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_0.65fr]">
         <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
           <div className="mb-4 flex items-center justify-between">
             <div className="text-lg font-semibold">Applications by Source</div>
@@ -74,9 +97,9 @@ export default function Dashboard() {
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sourceChart}>
+              <BarChart data={sourceChart} margin={{ top: 10, right: 12, left: 0, bottom: 72 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-                <XAxis dataKey="_id" stroke="rgba(255,255,255,0.6)" />
+                <XAxis dataKey="_id" stroke="rgba(255,255,255,0.6)" interval={0} angle={-35} textAnchor="end" height={88} tickMargin={14} tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.6)" />
                 <Tooltip />
                 <Bar dataKey="count" radius={[10, 10, 0, 0]}>
@@ -87,18 +110,30 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
-          <div className="mb-4 text-lg font-semibold">Daily Application Trend</div>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyTrend}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
-                <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" />
-                <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.6)" />
-                <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="#60a5fa" strokeWidth={3} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+        <div className="space-y-6">
+          <Link
+            to="/activity"
+            className="block rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/10"
+          >
+            <div className="text-sm text-white/60">Application Activity</div>
+            <div className="mt-2 text-2xl font-semibold text-white">{currentMonthTotal}</div>
+            <div className="mt-1 text-sm text-white/70">Current month total</div>
+            <div className="mt-4 text-sm font-medium text-blue-200">View Full Activity →</div>
+          </Link>
+
+          <div className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur">
+            <div className="mb-4 text-lg font-semibold">Daily Application Trend</div>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dailyTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                  <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" />
+                  <YAxis allowDecimals={false} stroke="rgba(255,255,255,0.6)" />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="count" stroke="#60a5fa" strokeWidth={3} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       </div>

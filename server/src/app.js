@@ -16,12 +16,19 @@ import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 dotenv.config();
 
 const app = express();
-const clientUrl = process.env.CLIENT_URL?.split(',').map((url) => url.trim()).filter(Boolean);
+const clientUrls = process.env.CLIENT_URL?.split(',').map((url) => url.trim()).filter(Boolean) || [];
+const localDevOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [...new Set([...clientUrls, ...localDevOrigins])];
 
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: clientUrl?.length ? clientUrl : true,
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '2mb' }));

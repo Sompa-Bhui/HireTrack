@@ -9,6 +9,7 @@ import DailyApply from './pages/daily/DailyApply';
 import Applications from './pages/applications/Applications';
 import Kanban from './pages/kanban/Kanban';
 import History from './pages/history/History';
+import Activity from './pages/activity/Activity';
 import NotFound from './pages/errors/NotFound';
 
 function Protected({ children }) {
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/applications" element={<Applications />} />
         <Route path="/kanban" element={<Kanban />} />
         <Route path="/history" element={<History />} />
+        <Route path="/activity" element={<Activity />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

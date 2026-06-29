@@ -10,7 +10,7 @@ export default function Register() {
   const navigate = useNavigate();
   const onSubmit = async (data) => {
     try {
-      const res = await api.post('/auth/register', data);
+      const res = await api.post('/api/auth/register', data);
       login(res.data.token, res.data.user);
       toast.success('Account created');
       navigate('/');

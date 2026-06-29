@@ -16,10 +16,14 @@ import { notFound, errorHandler } from './middlewares/errorMiddleware.js';
 dotenv.config();
 
 const app = express();
+const clientUrl = process.env.CLIENT_URL?.split(',').map((url) => url.trim()).filter(Boolean);
 
 app.use(helmet());
 app.use(compression());
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+app.use(cors({
+  origin: clientUrl?.length ? clientUrl : true,
+  credentials: true
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));

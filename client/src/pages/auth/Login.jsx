@@ -10,7 +10,7 @@ export default function Login() {
   const navigate = useNavigate();
   const onSubmit = async (data) => {
     try {
-      const res = await api.post('/auth/login', data);
+      const res = await api.post('/api/auth/login', data);
       login(res.data.token, res.data.user);
       toast.success('Welcome back');
       navigate('/');

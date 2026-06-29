@@ -7,7 +7,7 @@ export default function History() {
   const [to, setTo] = useState('');
   const { data } = useQuery({
     queryKey: ['daily-history', from, to],
-    queryFn: async () => (await api.get('/daily-trackers/history', { params: { from, to } })).data
+    queryFn: async () => (await api.get('/api/daily-trackers/history', { params: { from, to } })).data
   });
 
   return (

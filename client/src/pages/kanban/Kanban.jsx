@@ -46,7 +46,7 @@ export default function Kanban() {
 
   const { data } = useQuery({
     queryKey: ['kanban'],
-    queryFn: async () => (await api.get('/applications', { params: { limit: 500, includeArchived: 'false', sort: '-updatedAt' } })).data
+    queryFn: async () => (await api.get('/api/applications', { params: { limit: 500, includeArchived: 'false', sort: '-updatedAt' } })).data
   });
 
   const items = data?.items || [];
@@ -59,7 +59,7 @@ export default function Kanban() {
   );
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, status }) => (await api.put(`/applications/${id}`, { status })).data,
+    mutationFn: async ({ id, status }) => (await api.put(`/api/applications/${id}`, { status })).data,
     onSuccess: () => {
       toast.success('Application moved');
       queryClient.invalidateQueries({ queryKey: ['kanban'] });

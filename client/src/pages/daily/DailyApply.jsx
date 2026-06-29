@@ -14,7 +14,7 @@ export default function DailyApply() {
 
   const { data } = useQuery({
     queryKey: ['daily-tracker', date],
-    queryFn: async () => (await api.get('/daily-trackers/today', { params: { date } })).data
+    queryFn: async () => (await api.get('/api/daily-trackers/today', { params: { date } })).data
   });
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function DailyApply() {
   }, [data]);
 
   const saveMutation = useMutation({
-    mutationFn: async (payload) => (await api.post('/daily-trackers/today', payload)).data,
+    mutationFn: async (payload) => (await api.post('/api/daily-trackers/today', payload)).data,
     onSuccess: (res) => {
       toast.success(res.goalCompleted ? 'Mission Completed! Great Job!' : 'Daily tracker saved');
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });

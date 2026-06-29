@@ -20,7 +20,7 @@ const colors = ['#60a5fa', '#34d399', '#a78bfa', '#f59e0b', '#f97316', '#ef4444'
 export default function Dashboard() {
   const { data } = useQuery({
     queryKey: ['dashboard'],
-    queryFn: async () => (await api.get('/dashboard')).data
+    queryFn: async () => (await api.get('/api/dashboard')).data
   });
 
   const sourceChart = useMemo(() => data?.sourceAnalytics || [], [data?.sourceAnalytics]);

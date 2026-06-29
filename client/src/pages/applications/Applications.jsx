@@ -37,8 +37,8 @@ function ApplicationModal({ open, onClose, onSaved, editing }) {
 
   const mutation = useMutation({
     mutationFn: async (payload) => {
-      if (editing?._id) return (await api.put(`/applications/${editing._id}`, payload)).data;
-      return (await api.post('/applications', payload)).data;
+      if (editing?._id) return (await api.put(`/api/applications/${editing._id}`, payload)).data;
+      return (await api.post('/api/applications', payload)).data;
     },
     onSuccess: () => {
       toast.success(editing?._id ? 'Application updated' : 'Application added');
@@ -115,7 +115,7 @@ export default function Applications() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['applications', filters],
-    queryFn: async () => (await api.get('/applications', { params: { ...filters, limit: 200 } })).data
+    queryFn: async () => (await api.get('/api/applications', { params: { ...filters, limit: 200 } })).data
   });
 
   const items = data?.items || [];
@@ -127,7 +127,7 @@ export default function Applications() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: async (id) => (await api.delete(`/applications/${id}`)).data,
+    mutationFn: async (id) => (await api.delete(`/api/applications/${id}`)).data,
     onSuccess: () => {
       toast.success('Application deleted');
       onSaved();
@@ -135,7 +135,7 @@ export default function Applications() {
   });
 
   const duplicateMutation = useMutation({
-    mutationFn: async (id) => (await api.post(`/applications/${id}/duplicate`)).data,
+    mutationFn: async (id) => (await api.post(`/api/applications/${id}/duplicate`)).data,
     onSuccess: () => {
       toast.success('Application duplicated');
       onSaved();
@@ -143,7 +143,7 @@ export default function Applications() {
   });
 
   const archiveMutation = useMutation({
-    mutationFn: async (id) => (await api.patch(`/applications/${id}/archive`)).data,
+    mutationFn: async (id) => (await api.patch(`/api/applications/${id}/archive`)).data,
     onSuccess: () => {
       toast.success('Application archived');
       onSaved();
